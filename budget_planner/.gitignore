@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+budget.db
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
