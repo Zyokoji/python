@@ -1,13 +1,14 @@
 """theme.py — visual layer for Budget Planner.
 
-Holds the design tokens, one global CSS injection, and a small set of
-reusable render helpers so the pages stay readable and every screen
-looks like it belongs to the same product.
+Design tokens, one global CSS injection, and a few reusable render
+helpers, so pages stay readable and every screen looks like it belongs
+to the same product.
 
-Design direction: a ledger, not a dashboard. Pale ledger-paper ground,
-white "sheets" floating on it, deep ink-green text. Color is reserved
-for meaning — money in, money out, over or under budget — never for
-decoration. Figures are tabular so columns of numbers line up.
+Direction: a ledger viewed at night. Near-black green ground, surfaces
+that lift by one quiet step rather than by drop shadows, hairline rules
+instead of boxes. Color is reserved for meaning — money in, money out,
+over or under budget — never decoration. Figures are tabular so columns
+of numbers align.
 """
 
 from __future__ import annotations
@@ -20,15 +21,21 @@ import streamlit as st
 # Tokens
 # --------------------------------------------------------------------------- #
 
-INK = "#16211C"        # primary text, deep green-black
-INK_SOFT = "#5A6B62"   # secondary text
-RULE = "#D8DFD7"       # hairlines and borders
-PAPER = "#EFF2ED"      # page ground
-SHEET = "#FFFFFF"      # card surface
-ACCENT = "#0F6B57"     # primary brand green
-POSITIVE = "#1B7A4B"   # money in / under budget
-NEGATIVE = "#B03F28"   # money out / over budget
-WARNING = "#9A6212"    # approaching a limit
+GROUND = "#0E1512"      # page background, near-black green
+SURFACE = "#161F1B"     # cards, sidebar
+SURFACE_2 = "#1C2723"   # inputs, forms, hover
+RULE = "#26332D"        # hairlines
+RULE_SOFT = "#1E2A25"   # quieter hairlines
+
+TEXT = "#E9EFEB"        # primary text
+TEXT_SOFT = "#93A69C"   # secondary text
+TEXT_FAINT = "#6B7D74"  # tertiary / disabled
+
+ACCENT = "#3FBF9C"      # brand, interactive
+ACCENT_DIM = "#2E8F75"
+POSITIVE = "#45D19A"    # money in / under budget
+NEGATIVE = "#FF7F68"    # money out / over budget
+WARNING = "#E5B25C"     # approaching a limit
 
 FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
 
@@ -40,199 +47,209 @@ html, body, [class*="st-"], button, input, textarea, select {{
     font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }}
 
-/* Ledger ground, with the main column as a floating sheet of paper. */
-.stApp {{ background: {PAPER}; }}
+.stApp {{ background: {GROUND}; }}
 
+/* Content sits directly on the ground — no floating white slab, which
+   is what made the light version feel boxed-in. Breathing room instead. */
 .block-container {{
-    background: {SHEET};
-    border: 1px solid {RULE};
-    border-radius: 10px;
-    padding: 2.4rem 2.6rem 3rem 2.6rem;
-    margin-top: 2.2rem;
-    margin-bottom: 2.5rem;
-    max-width: 1180px;
+    padding: 2.6rem 3rem 4rem 3rem;
+    max-width: 1220px;
 }}
 
-/* Type scale. Headings are tight and confident; no all-caps eyebrows. */
+/* ---- Type ---- */
 h1 {{
-    font-size: 1.9rem !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.02em;
-    color: {INK};
-    margin-bottom: 0.2rem !important;
-}}
-h2 {{
-    font-size: 1.18rem !important;
+    font-size: 1.75rem !important;
     font-weight: 600 !important;
-    letter-spacing: -0.01em;
-    color: {INK};
-    margin-top: 2rem !important;
-    padding-bottom: 0.45rem;
-    border-bottom: 1px solid {RULE};
+    letter-spacing: -0.025em;
+    color: {TEXT};
+    margin-bottom: 0.15rem !important;
 }}
-h3 {{
-    font-size: 1.02rem !important;
+h2, h3 {{
+    font-size: 0.82rem !important;
     font-weight: 600 !important;
-    color: {INK};
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: {TEXT_SOFT} !important;
+    margin-top: 2.4rem !important;
+    margin-bottom: 0.9rem !important;
 }}
-p, label, .stMarkdown {{ color: {INK}; }}
+p, label, .stMarkdown {{ color: {TEXT}; }}
+small, .stCaption {{ color: {TEXT_SOFT}; }}
 
-/* Every figure in the app is tabular, so digits align in columns. */
-.stMetric, .ledger-figure, .stDataFrame, .stNumberInput input {{
+.stMetric, .stat-value, .row-figure, .stDataFrame, .stNumberInput input {{
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
 }}
 
-/* Sidebar reads as the ledger's index tab. */
+/* ---- Sidebar ---- */
 section[data-testid="stSidebar"] {{
-    background: {SHEET};
-    border-right: 1px solid {RULE};
+    background: {SURFACE};
+    border-right: 1px solid {RULE_SOFT};
 }}
 section[data-testid="stSidebar"] a {{
-    border-radius: 6px;
+    border-radius: 7px;
     font-weight: 500;
+    color: {TEXT_SOFT} !important;
+}}
+section[data-testid="stSidebar"] a:hover {{
+    background: {SURFACE_2};
+    color: {TEXT} !important;
 }}
 
-/* Buttons: solid for the primary action, quiet outline for everything else. */
-.stButton > button, .stFormSubmitButton > button, .stDownloadButton > button {{
-    border-radius: 7px;
+/* ---- Buttons ---- */
+.stButton > button, .stDownloadButton > button {{
+    border-radius: 8px;
     border: 1px solid {RULE};
-    background: {SHEET};
-    color: {INK};
+    background: {SURFACE};
+    color: {TEXT};
     font-weight: 500;
-    transition: background 120ms ease, border-color 120ms ease;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }}
-.stButton > button:hover, .stFormSubmitButton > button:hover, .stDownloadButton > button:hover {{
-    border-color: {ACCENT};
+.stButton > button:hover, .stDownloadButton > button:hover {{
+    background: {SURFACE_2};
+    border-color: {ACCENT_DIM};
     color: {ACCENT};
 }}
 .stFormSubmitButton > button {{
+    border-radius: 8px;
     background: {ACCENT};
-    border-color: {ACCENT};
-    color: #FFFFFF;
+    border: 1px solid {ACCENT};
+    color: #06110D;
+    font-weight: 600;
 }}
 .stFormSubmitButton > button:hover {{
-    background: #0B5546;
-    border-color: #0B5546;
-    color: #FFFFFF;
+    background: #54D3AF;
+    border-color: #54D3AF;
+    color: #06110D;
 }}
-.stButton > button:focus-visible, .stFormSubmitButton > button:focus-visible {{
+.stButton > button:focus-visible,
+.stFormSubmitButton > button:focus-visible,
+.stDownloadButton > button:focus-visible {{
     outline: 2px solid {ACCENT};
     outline-offset: 2px;
 }}
 
-/* Inputs */
-.stTextInput input, .stNumberInput input, .stDateInput input, .stSelectbox div[data-baseweb="select"] > div {{
-    border-radius: 7px !important;
-    border-color: {RULE} !important;
+/* ---- Inputs ---- */
+.stTextInput input, .stNumberInput input, .stDateInput input,
+.stSelectbox div[data-baseweb="select"] > div, .stTextArea textarea {{
+    background: {SURFACE_2} !important;
+    border-radius: 8px !important;
+    border: 1px solid {RULE} !important;
+    color: {TEXT} !important;
+}}
+.stTextInput input:focus, .stNumberInput input:focus {{
+    border-color: {ACCENT} !important;
 }}
 
-/* Forms and expanders sit on a faintly tinted panel, not another white box. */
 div[data-testid="stForm"] {{
-    background: {PAPER};
-    border: 1px solid {RULE};
-    border-radius: 9px;
-    padding: 1.15rem 1.25rem 0.5rem 1.25rem;
+    background: {SURFACE};
+    border: 1px solid {RULE_SOFT};
+    border-radius: 12px;
+    padding: 1.3rem 1.4rem 0.6rem 1.4rem;
 }}
-details, div[data-testid="stExpander"] {{
-    border-radius: 9px !important;
-    border-color: {RULE} !important;
+div[data-testid="stExpander"] {{
+    background: {SURFACE};
+    border: 1px solid {RULE_SOFT} !important;
+    border-radius: 12px !important;
 }}
 
-/* Progress bars: thin ledger rules rather than chunky pills. */
-.stProgress > div > div {{ background: {RULE}; border-radius: 3px; height: 7px; }}
-.stProgress > div > div > div {{ border-radius: 3px; }}
+/* ---- Progress: thin rules, not chunky pills ---- */
+.stProgress > div > div {{ background: {RULE}; border-radius: 99px; height: 6px; }}
+.stProgress > div > div > div {{ border-radius: 99px; }}
+.stProgress p {{ font-size: 0.85rem !important; color: {TEXT_SOFT} !important; }}
 
-.stTabs [data-baseweb="tab-list"] {{ gap: 1.5rem; border-bottom: 1px solid {RULE}; }}
-.stTabs [data-baseweb="tab"] {{ font-weight: 500; }}
+.stTabs [data-baseweb="tab-list"] {{ gap: 1.6rem; border-bottom: 1px solid {RULE_SOFT}; }}
+.stTabs [data-baseweb="tab"] {{ font-weight: 500; color: {TEXT_SOFT}; }}
+.stTabs [aria-selected="true"] {{ color: {TEXT} !important; }}
 
-hr {{ border-color: {RULE}; }}
-#MainMenu, footer {{ visibility: hidden; }}
+hr {{ border-color: {RULE_SOFT}; }}
+#MainMenu, footer, [data-testid="stDecoration"] {{ visibility: hidden; }}
 
 @media (prefers-reduced-motion: reduce) {{
     * {{ transition: none !important; animation: none !important; }}
 }}
-
 @media (max-width: 640px) {{
-    .block-container {{ padding: 1.4rem 1.1rem 2rem 1.1rem; margin-top: 1rem; }}
-    h1 {{ font-size: 1.55rem !important; }}
+    .block-container {{ padding: 1.5rem 1.1rem 2.5rem 1.1rem; }}
+    h1 {{ font-size: 1.45rem !important; }}
+    .stat {{ flex: 1 1 50% !important; }}
 }}
 
-/* ---- Custom components ---- */
+/* ---- Components ---- */
 
 .ledger-sub {{
-    color: {INK_SOFT};
-    font-size: 0.92rem;
+    color: {TEXT_SOFT};
+    font-size: 0.93rem;
     margin-top: 0.1rem;
-    margin-bottom: 1.4rem;
+    margin-bottom: 1.8rem;
 }}
 
 .stat-row {{
     display: flex;
     flex-wrap: wrap;
-    gap: 0;
-    border: 1px solid {RULE};
-    border-radius: 9px;
+    border: 1px solid {RULE_SOFT};
+    border-radius: 12px;
     overflow: hidden;
-    margin-bottom: 0.5rem;
+    background: {SURFACE};
+    margin-bottom: 0.4rem;
 }}
 .stat {{
-    flex: 1 1 160px;
-    padding: 0.95rem 1.15rem 1.05rem 1.15rem;
-    border-right: 1px solid {RULE};
-    background: {SHEET};
+    flex: 1 1 170px;
+    padding: 1.05rem 1.25rem 1.15rem 1.25rem;
+    border-right: 1px solid {RULE_SOFT};
 }}
 .stat:last-child {{ border-right: none; }}
 .stat-label {{
-    font-size: 0.8rem;
-    color: {INK_SOFT};
-    font-weight: 500;
-    margin-bottom: 0.3rem;
+    font-size: 0.73rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: {TEXT_FAINT};
+    font-weight: 600;
+    margin-bottom: 0.45rem;
 }}
 .stat-value {{
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 600;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.15;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: {TEXT};
 }}
-.stat-note {{ font-size: 0.78rem; color: {INK_SOFT}; margin-top: 0.2rem; }}
+.stat-note {{ font-size: 0.76rem; color: {TEXT_FAINT}; margin-top: 0.3rem; }}
 
-.pos {{ color: {POSITIVE}; }}
-.neg {{ color: {NEGATIVE}; }}
-.warn {{ color: {WARNING}; }}
-.dim {{ color: {INK_SOFT}; }}
+.pos {{ color: {POSITIVE} !important; }}
+.neg {{ color: {NEGATIVE} !important; }}
+.warn {{ color: {WARNING} !important; }}
+.dim {{ color: {TEXT_SOFT} !important; }}
 
 .row-item {{
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    padding: 0.55rem 0;
-    border-bottom: 1px solid {RULE};
+    padding: 0.65rem 0;
+    border-bottom: 1px solid {RULE_SOFT};
     gap: 1rem;
 }}
 .row-item:last-child {{ border-bottom: none; }}
-.row-name {{ font-weight: 500; }}
-.row-meta {{ font-size: 0.82rem; color: {INK_SOFT}; }}
-.row-figure {{ font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }}
+.row-name {{ font-weight: 500; color: {TEXT}; font-size: 0.95rem; }}
+.row-meta {{ font-size: 0.8rem; color: {TEXT_FAINT}; }}
+.row-figure {{ font-weight: 600; white-space: nowrap; font-size: 0.95rem; }}
 
 .empty-note {{
     border: 1px dashed {RULE};
-    border-radius: 9px;
-    padding: 1.1rem 1.2rem;
-    color: {INK_SOFT};
+    border-radius: 12px;
+    padding: 1.15rem 1.3rem;
+    color: {TEXT_SOFT};
     font-size: 0.9rem;
-    background: {PAPER};
+    background: {SURFACE};
+    line-height: 1.5;
 }}
 </style>
 """
 
 
 def apply(page_title: str, page_icon: str, subtitle: str | None = None) -> None:
-    """Set page config, inject global CSS, and render the page heading.
+    """Set page config, inject global CSS, render the page heading.
 
-    Call this once at the top of every page, immediately after the
-    imports, before any other Streamlit call.
+    Call once at the top of every page, before any other Streamlit call.
     """
     st.set_page_config(page_title=f"{page_title} · Budget Planner", page_icon=page_icon, layout="wide")
     st.markdown(_GLOBAL_CSS, unsafe_allow_html=True)
@@ -242,11 +259,10 @@ def apply(page_title: str, page_icon: str, subtitle: str | None = None) -> None:
 
 
 def stat_row(stats: list[dict]) -> None:
-    """Render a joined row of figures.
+    """One joined strip of figures, so they read as a single statement
+    line rather than as disconnected cards.
 
-    Each stat is {"label": str, "value": str, "tone": "pos"|"neg"|""|None,
-    "note": str|None}. Rendered as one bordered strip so the numbers read
-    as a single statement line rather than four disconnected cards.
+    Each stat: {"label", "value", "tone": "pos"|"neg"|""|None, "note"}.
     """
     cells = []
     for s in stats:
@@ -263,7 +279,7 @@ def stat_row(stats: list[dict]) -> None:
 
 
 def line_item(name: str, figure: str, meta: str = "", tone: str = "") -> None:
-    """A single ruled ledger line: name (+ meta) on the left, figure right."""
+    """A ruled ledger line: name (+ meta) left, figure right."""
     meta_html = f"<div class='row-meta'>{html.escape(meta)}</div>" if meta else ""
     st.markdown(
         f"<div class='row-item'><div><div class='row-name'>{html.escape(name)}</div>{meta_html}</div>"
@@ -273,7 +289,7 @@ def line_item(name: str, figure: str, meta: str = "", tone: str = "") -> None:
 
 
 def empty_note(message: str) -> None:
-    """An empty state that tells the person what to do next."""
+    """An empty state that says what to do next."""
     st.markdown(f"<div class='empty-note'>{html.escape(message)}</div>", unsafe_allow_html=True)
 
 
