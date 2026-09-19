@@ -53,7 +53,7 @@ with left:
         theme.empty_note("No expenses logged this month yet. Add one from the Add Transaction page.")
     else:
         by_cat = expense_df.groupby("category")["amount"].sum().sort_values(ascending=False)
-        st.bar_chart(by_cat, color=theme.ACCENT, height=260)
+        st.bar_chart(by_cat, color=theme.chart_colors()["accent"], height=260)
 
     st.subheader("In and out, last six months")
     trend_df = db.get_transactions(conn, start_date=utils.months_ago(today, 5))
@@ -69,7 +69,8 @@ with left:
             if col not in pivot.columns:
                 pivot[col] = 0
         pivot = pivot[["Income", "Expense"]]
-        st.line_chart(pivot, color=[theme.POSITIVE, theme.NEGATIVE], height=260)
+        cc = theme.chart_colors()
+        st.line_chart(pivot, color=[cc["positive"], cc["negative"]], height=260)
 
 with right:
     st.subheader("Budgets")

@@ -22,6 +22,9 @@ accounts, no cloud sync, and no telemetry.
 - **Backup & restore** — export everything to a JSON file and restore it
   later (or on a new machine)
 - **Multi-currency display** — pick a symbol (USD/EUR/GBP/JPY/INR or custom)
+- **Dark and light themes** — dark by default; switch from the button at the
+  top of the sidebar. Your choice is saved to the database, so it persists
+  across restarts
 
 ## Project structure
 
@@ -43,7 +46,8 @@ budget_planner/
 │   ├── test_database.py            # Unit tests for the data layer
 │   ├── test_utils.py               # Unit tests for date/currency/pacing math
 │   └── test_app_pages.py           # End-to-end tests: real Streamlit AppTest simulations
-├── .streamlit/config.toml          # Theme
+├── theme.py                        # Design tokens, CSS, dark/light switch
+├── .streamlit/config.toml          # Fallback theme defaults
 ├── requirements.txt
 ├── requirements-dev.txt
 └── budget.db                       # Created automatically on first run (not included)
@@ -82,6 +86,16 @@ pytest
 - Full user flows on every page — filling in forms and clicking buttons via
   Streamlit's official `AppTest` framework, then checking the database
   actually changed the way it should
+
+## A note on theming
+
+The palette is injected as CSS by `theme.py` rather than relying solely on
+`.streamlit/config.toml`. Streamlit only reads that file from the directory
+you launch from, so `streamlit run budget_planner/app.py` from a parent
+folder silently falls back to the stock white theme. Injecting the palette
+means the app looks right however you start it. Both palettes are defined as
+token dictionaries at the top of `theme.py` — change a few hex values there
+and the whole app follows.
 
 ## Known limitations
 

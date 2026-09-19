@@ -54,7 +54,9 @@ def test_add_transaction_via_form_submit():
     # Fill the number input (amount) and submit the form.
     at.number_input[0].set_value(55.5).run()
     assert not at.exception
-    at.button[0].click().run()
+    # Select by label, not index: the sidebar theme toggle is also a button.
+    submit = [b for b in at.button if b.label == "Add Transaction"][0]
+    submit.click().run()
     assert not at.exception
 
     # Verify it actually landed in the database.
@@ -76,7 +78,8 @@ def test_goal_creation_with_no_target_date():
 
     at.text_input[0].set_value("Emergency Fund").run()
     at.number_input[0].set_value(1000).run()
-    at.button[0].click().run()
+    create = [b for b in at.button if b.label == "Create Goal"][0]
+    create.click().run()
     assert not at.exception
 
     import database as db
@@ -187,3 +190,77 @@ def test_recurring_page_add_and_pause():
     recurring = db.get_recurring(conn)
     assert len(recurring) == 1
     assert recurring.iloc[0]["name"] == "Netflix"
+
+
+# --------------------------------------------------------------------------- #
+# Theme switching
+# --------------------------------------------------------------------------- #
+
+
+def test_defaults_to_dark_theme():
+    at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=15)
+    at.run()
+    assert not at.exception
+
+    import theme
+
+    assert theme.DEFAULT_MODE == "dark"
+    # The toggle offers the *other* mode, so in dark it offers light.
+    toggle = [b for b in at.button if "Switch to" in b.label][0]
+    assert "light" in toggle.label
+
+
+def test_toggle_switches_and_persists_theme():
+    at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=15)
+    at.run()
+    toggle = [b for b in at.button if "Switch to" in b.label][0]
+    toggle.click().run()
+    assert not at.exception
+
+    # Now offering dark, meaning we are in light.
+    toggle2 = [b for b in at.button if "Switch to" in b.label][0]
+    assert "dark" in toggle2.label
+
+    # And it was written to the database, so it survives a restart.
+    import database as db
+    import db_session
+
+    conn, _ = db_session.get_conn_and_sync()
+    assert db.get_setting(conn, "ui_theme") == "light"
+
+
+def test_saved_light_theme_is_restored_on_load():
+    import database as db
+    import db_session
+
+    conn, _ = db_session.get_conn_and_sync()
+    db.set_setting(conn, "ui_theme", "light")
+
+    at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=15)
+    at.run()
+    assert not at.exception
+    toggle = [b for b in at.button if "Switch to" in b.label][0]
+    assert "dark" in toggle.label  # offering dark means light is active
+
+
+def test_corrupt_theme_value_falls_back_to_dark():
+    import database as db
+    import db_session
+
+    conn, _ = db_session.get_conn_and_sync()
+    db.set_setting(conn, "ui_theme", "chartreuse")
+
+    at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=15)
+    at.run()
+    assert not at.exception
+    toggle = [b for b in at.button if "Switch to" in b.label][0]
+    assert "light" in toggle.label  # fell back to dark
+
+
+def test_both_palettes_define_every_token():
+    import theme
+
+    assert set(theme.DARK) == set(theme.LIGHT), "palettes must define the same tokens"
+    for name, palette in (("dark", theme.DARK), ("light", theme.LIGHT)):
+        for key, value in palette.items():
+            assert value.startswith("#") and len(value) == 7, f"{name}.{key} is not a hex colour"
