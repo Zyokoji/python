@@ -10,11 +10,12 @@ import streamlit as st
 
 import database as db
 import db_session
+import theme
 
-st.set_page_config(page_title="Add Transaction", page_icon="➕", layout="wide")
+theme.apply('Add Transaction', '➕', subtitle='Log money in or out.')
+
 conn, symbol = db_session.get_conn_and_sync()
 
-st.title("➕ Add Transaction")
 
 tx_type = st.radio("Type", ["Expense", "Income"], horizontal=True)
 categories_df = db.get_categories(conn, kind=tx_type)

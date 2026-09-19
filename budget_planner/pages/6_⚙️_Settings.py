@@ -12,11 +12,12 @@ import streamlit as st
 import config
 import database as db
 import db_session
+import theme
 
-st.set_page_config(page_title="Settings", page_icon="⚙️", layout="wide")
+theme.apply('Settings', '⚙️', subtitle='Categories, currency, and your data.')
+
 conn, symbol = db_session.get_conn_and_sync()
 
-st.title("⚙️ Settings")
 
 # --- Currency ---------------------------------------------------------------
 st.subheader("Currency")
@@ -66,7 +67,7 @@ for tab, kind in [(tab_income, "Income"), (tab_expense, "Expense")]:
 st.divider()
 
 # --- Backup / Restore ---------------------------------------------------------
-st.subheader("Backup & Restore")
+st.subheader("Backup and restore")
 c1, c2 = st.columns(2)
 
 with c1:
@@ -97,7 +98,7 @@ with c2:
                 st.error(f"Couldn't restore backup: {e}")
 
 st.divider()
-st.subheader("Danger Zone")
+st.subheader("Erase everything")
 with st.expander("Reset all data"):
     st.warning("This permanently deletes every transaction, budget, recurring item, and goal.")
     confirm_text = st.text_input("Type RESET to confirm")

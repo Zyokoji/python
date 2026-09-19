@@ -11,15 +11,16 @@ import streamlit as st
 import config
 import database as db
 import db_session
+import theme
 import utils
 
-st.set_page_config(page_title="Recurring", page_icon="🔁", layout="wide")
+theme.apply('Recurring', '🔁', subtitle='Bills and income that repeat. These post themselves when you open the app.')
+
 conn, symbol = db_session.get_conn_and_sync()
 
-st.title("🔁 Recurring Transactions")
 st.caption("Recurring items are generated automatically whenever you open the app.")
 
-st.subheader("Add a Recurring Transaction")
+st.subheader("Add a repeating item")
 tx_type = st.radio("Type", ["Expense", "Income"], horizontal=True, key="recurring_type")
 categories_df = db.get_categories(conn, kind=tx_type)
 
@@ -44,11 +45,11 @@ else:
                 st.rerun()
 
 st.divider()
-st.subheader("Active & Paused")
+st.subheader("Your repeating items")
 recurring_df = db.get_recurring(conn)
 
 if recurring_df.empty:
-    st.caption("No recurring transactions yet.")
+    theme.empty_note("Nothing repeating yet. Add rent, a subscription or a paycheck above.")
 else:
     for _, row in recurring_df.iterrows():
         c1, c2, c3, c4 = st.columns([3, 3, 1, 1])

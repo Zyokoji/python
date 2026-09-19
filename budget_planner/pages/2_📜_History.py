@@ -10,12 +10,13 @@ import streamlit as st
 
 import database as db
 import db_session
+import theme
 import utils
 
-st.set_page_config(page_title="History", page_icon="📜", layout="wide")
+theme.apply('History', '📜', subtitle='Find, edit or export past transactions.')
+
 conn, symbol = db_session.get_conn_and_sync()
 
-st.title("📜 Transaction History")
 
 with st.expander("Filters", expanded=True):
     c1, c2, c3, c4 = st.columns(4)
@@ -37,7 +38,7 @@ df = db.get_transactions(
 )
 
 if df.empty:
-    st.info("No transactions match these filters.")
+    theme.empty_note("Nothing matches these filters. Try widening the date range.")
 else:
     total_in = df.loc[df["type"] == "Income", "amount"].sum()
     total_out = df.loc[df["type"] == "Expense", "amount"].sum()
@@ -53,7 +54,7 @@ else:
     st.download_button("⬇️ Download CSV", csv, "transactions.csv", "text/csv")
 
     st.divider()
-    st.subheader("Edit or Delete a Transaction")
+    st.subheader("Edit or delete")
     id_options = df["id"].tolist()
     selected_id = st.selectbox(
         "Select by ID",

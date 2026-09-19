@@ -11,14 +11,15 @@ import streamlit as st
 
 import database as db
 import db_session
+import theme
 import utils
 
-st.set_page_config(page_title="Goals", page_icon="🏆", layout="wide")
+theme.apply('Goals', '🏆', subtitle='Set a target, track contributions towards it.')
+
 conn, symbol = db_session.get_conn_and_sync()
 
-st.title("🏆 Savings Goals")
 
-st.subheader("New Goal")
+st.subheader("New goal")
 with st.form("goal_form", clear_on_submit=True):
     c1, c2, c3 = st.columns(3)
     name = c1.text_input("Goal name (e.g. Emergency Fund)")
@@ -37,7 +38,7 @@ st.divider()
 goals_df = db.get_goals(conn)
 
 if goals_df.empty:
-    st.info("No goals yet — create one above.")
+    theme.empty_note("No goals yet. Name a target above and contributions will track against it.")
 else:
     for _, row in goals_df.iterrows():
         progress = db.get_goal_progress(conn, row["id"])

@@ -10,18 +10,19 @@ import streamlit as st
 
 import database as db
 import db_session
+import theme
 import utils
 
-st.set_page_config(page_title="Budgets", page_icon="🎯", layout="wide")
+theme.apply('Budgets', '🎯', subtitle='Set a monthly ceiling per category and watch your pace.')
+
 conn, symbol = db_session.get_conn_and_sync()
 
-st.title("🎯 Budgets")
 
 expense_categories = db.get_categories(conn, kind="Expense")
 budgets_df = db.get_budgets(conn)
 existing = dict(zip(budgets_df["category"], budgets_df["monthly_limit"])) if not budgets_df.empty else {}
 
-st.subheader("Set a Monthly Limit")
+st.subheader("Set a limit")
 if expense_categories.empty:
     st.warning("No expense categories yet. Add one on the Settings page.")
 else:
@@ -42,7 +43,7 @@ else:
             st.rerun()
 
 st.divider()
-st.subheader("This Month's Status")
+st.subheader("This month")
 
 today = date.today()
 month_start, month_end = utils.month_bounds(today)
@@ -50,7 +51,7 @@ df_month = db.get_transactions(conn, start_date=month_start, end_date=month_end,
 spend_by_cat = df_month.groupby("category")["amount"].sum() if not df_month.empty else {}
 
 if budgets_df.empty:
-    st.caption("No budgets set yet — add one above.")
+    theme.empty_note("No limits yet. Add one above and this fills in with your pace for the month.")
 else:
     total_limit = budgets_df["monthly_limit"].sum()
     total_spent = sum(float(spend_by_cat.get(cat, 0.0)) for cat in budgets_df["category"])
